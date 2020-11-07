@@ -38,7 +38,7 @@ Route::group(['middleware'=>'api'], function(){
 
 
     // UPDATE REQUEST
-    Route::put('contact/{id}', function(Request $request, $id){
+    Route::patch('contact/{id}', function(Request $request, $id){
             $contact = Contact::findOrFail($id);
 
             $request->validate([

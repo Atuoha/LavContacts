@@ -14,11 +14,11 @@
         </div>
     </div>
 
-   
-
-
-
     <script src="/js/app.js"></script>
+
+    <footer class="footer text-center mt-5">
+        <p class="text-small">All Rights Reserved Contacts 2020 by <a href="https://atuoha.github.io">Atutechs Corp</a> &copy;  </p>
+    </footer>
 </body>
 </html>
 

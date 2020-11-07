@@ -1960,6 +1960,28 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -1975,21 +1997,76 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     console.log('contacts loaded....');
+    this.fetchContactList();
   },
   methods: {
-    createContact: function createContact() {
-      axios({
-        method: 'post',
-        url: '/contact/store',
-        data: {
-          name: 'Fred',
-          email: 'Flintstone',
-          phone: 'Flintstone',
-          note: 'Flintstone'
-        }
+    fetchContactList: function fetchContactList() {
+      var _this = this;
+
+      console.log('fetching contacts');
+      axios.get('api/contacts').then(function (response) {
+        console.log(response.data);
+        _this.list = response.data;
+      })["catch"](function (err) {
+        console.log(err);
       });
     },
-    updateContact: function updateContact($id) {}
+    createContact: function createContact() {
+      console.log('Creating Contact now');
+      var self = this;
+      var params = Object.assign({}, self.contact);
+      axios.post('api/contact/store', params).then(function () {
+        self.contact.name = '';
+        self.contact.email = '';
+        self.contact.phone = '';
+        self.contact.note = '';
+        self.edit = false;
+      })["catch"](function (err) {
+        console.log(err);
+      });
+      this.fetchContactList();
+    },
+    showContact: function showContact(id) {
+      var self = this;
+      axios.get('api/contact/' + id).then(function (response) {
+        self.edit = true;
+        self.contact.id = response.data.id;
+        self.contact.name = response.data.name;
+        self.contact.email = response.data.email;
+        self.contact.phone = response.data.phone;
+        self.contact.note = response.data.note;
+        console.log(response.data);
+      })["catch"](function (err) {
+        console.log(err);
+      });
+    },
+    updateContact: function updateContact(id) {
+      var self = this;
+      var params = Object.assign({}, self.contact);
+      axios.patch('api/contact/' + id, params).then(function () {
+        self.contact.id = '';
+        self.contact.name = '';
+        self.contact.email = '';
+        self.contact.phone = '';
+        self.contact.note = '';
+        self.edit = false;
+      })["catch"](function (err) {
+        console.log(err);
+      });
+      this.fetchContactList();
+    },
+    deleteContact: function deleteContact(id) {
+      axios["delete"]('api/contact/' + id).then(function () {
+        self.contact.name = '';
+        self.contact.email = '';
+        self.contact.phone = '';
+        self.contact.note = '';
+        self.edit = false;
+      })["catch"](function (err) {
+        console.log(err);
+      });
+      this.fetchContactList();
+    }
   }
 });
 
@@ -37767,7 +37844,74 @@ var render = function() {
           )
         ])
       ]
-    )
+    ),
+    _vm._v(" "),
+    _c("hr"),
+    _vm._v(" "),
+    _c("div", { staticClass: "container" }, [
+      _c(
+        "ul",
+        { staticClass: "list-group" },
+        [
+          _c("p", { staticClass: "lead" }, [_vm._v("All Contacts")]),
+          _vm._v(" "),
+          _vm._l(_vm.list, function(contact) {
+            return _c("li", { staticClass: "list-group-item" }, [
+              _c("ul", { staticClass: "list-group" }, [
+                _c("li", { staticClass: "list-group-item text-small" }, [
+                  _c("strong", [_vm._v("Name: ")]),
+                  _vm._v(" " + _vm._s(contact.name))
+                ]),
+                _vm._v(" "),
+                _c("li", { staticClass: "list-group-item text-small" }, [
+                  _c("strong", [_vm._v("Email: ")]),
+                  _vm._v(" " + _vm._s(contact.email))
+                ]),
+                _vm._v(" "),
+                _c("li", { staticClass: "list-group-item text-small" }, [
+                  _c("strong", [_vm._v("Phone: ")]),
+                  _vm._v(" " + _vm._s(contact.phone))
+                ]),
+                _vm._v(" "),
+                _c("li", { staticClass: "list-group-item text-small" }, [
+                  _c("strong", [_vm._v("Note: ")]),
+                  _vm._v(' "' + _vm._s(contact.note) + '"')
+                ])
+              ]),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-success",
+                  on: {
+                    click: function($event) {
+                      return _vm.showContact(contact.id)
+                    }
+                  }
+                },
+                [_vm._v("Update")]
+              ),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-danger",
+                  on: {
+                    click: function($event) {
+                      return _vm.deleteContact(contact.id)
+                    }
+                  }
+                },
+                [_vm._v("Delete")]
+              )
+            ])
+          })
+        ],
+        2
+      )
+    ])
   ])
 }
 var staticRenderFns = [
@@ -49980,6 +50124,8 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 // Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 
+var axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+
 Vue.component('contacts', __webpack_require__(/*! ./components/Contacts.vue */ "./resources/js/components/Contacts.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -50042,14 +50188,15 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 /*!**********************************************!*\
   !*** ./resources/js/components/Contacts.vue ***!
   \**********************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Contacts_vue_vue_type_template_id_6766143e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Contacts.vue?vue&type=template&id=6766143e& */ "./resources/js/components/Contacts.vue?vue&type=template&id=6766143e&");
 /* harmony import */ var _Contacts_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Contacts.vue?vue&type=script&lang=js& */ "./resources/js/components/Contacts.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _Contacts_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _Contacts_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 
 
@@ -50079,7 +50226,7 @@ component.options.__file = "resources/js/components/Contacts.vue"
 /*!***********************************************************************!*\
   !*** ./resources/js/components/Contacts.vue?vue&type=script&lang=js& ***!
   \***********************************************************************/
-/*! exports provided: default */
+/*! no static exports found */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

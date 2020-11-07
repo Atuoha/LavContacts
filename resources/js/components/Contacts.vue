@@ -42,6 +42,28 @@
             </div>
        </form>
 
+
+       <hr>
+       <div class="container">
+            <ul class="list-group">
+                <p class="lead">All Contacts</p>
+                <li class="list-group-item" v-for="contact in list">
+
+                    <ul class="list-group">
+                        <li class="list-group-item text-small"><strong>Name: </strong> {{ contact.name }}</li>
+                        <li class="list-group-item text-small"><strong>Email: </strong> {{ contact.email }}</li>
+                        <li class="list-group-item text-small"><strong>Phone: </strong> {{ contact.phone }}</li>
+                        <li class="list-group-item text-small"><strong>Note: </strong> "{{ contact.note }}"</li>
+                    </ul>
+                    <br>
+
+                   <button class="btn btn-success" @click="showContact(contact.id)">Update</button>
+                   <button class="btn btn-danger" @click="deleteContact(contact.id)">Delete</button>                    
+                </li>
+
+            </ul>
+        </div>
+
     </div>
    
 </template>
@@ -67,26 +89,92 @@
 
         mounted: function(){
             console.log('contacts loaded....')
+            this.fetchContactList()
         },
 
         methods: {
-            createContact: function(){
-                axios({
-                    method: 'post',
-                    url: '/contact/store',
-                    data: {
-                        name: 'Fred',
-                        email: 'Flintstone',
-                        phone: 'Flintstone',
-                        note: 'Flintstone',
-
-                    }
-                });
+            fetchContactList: function(){
+                console.log('fetching contacts');
+                axios.get('api/contacts')
+                .then(response=>{
+                    console.log(response.data);
+                    this.list = response.data;
+                })
+                .catch(err=>{
+                    console.log(err);
+                })
             },
 
-            updateContact: function($id){
+            createContact: function(){
+                console.log('Creating Contact now')
+                let self = this;
+                let params = Object.assign({}, self.contact)
+                axios.post('api/contact/store', params)
+                .then(function(){
+                        self.contact.name  = '';
+                        self.contact.email  = '';
+                        self.contact.phone  = '';
+                        self.contact.note  = '';
+                        self.edit = false;
+                })
+                .catch(err=>{
+                    console.log(err)
+                })
+                this.fetchContactList();
+            },
 
+            showContact: function(id){
+                let self = this;
+                axios.get('api/contact/'+id)
+                .then(response=>{
+                    self.edit = true;
+                    self.contact.id  = response.data.id;
+                    self.contact.name  = response.data.name;
+                    self.contact.email  = response.data.email;
+                    self.contact.phone  = response.data.phone;
+                    self.contact.note  = response.data.note;
+                    console.log(response.data)
+                    
+                })
+                .catch(err=>{
+                    console.log(err)
+                })
+            },
+
+            updateContact: function(id){
+               let self = this;
+                let params = Object.assign({}, self.contact)
+                axios.patch('api/contact/'+id, params)
+                .then(function(){
+                        self.contact.id  = '';
+                        self.contact.name  = '';
+                        self.contact.email  = '';
+                        self.contact.phone  = '';
+                        self.contact.note  = '';
+                        self.edit = false;
+                })
+                .catch(err=>{
+                    console.log(err)
+                })
+                this.fetchContactList();
+                
+            },
+
+            deleteContact: function(id){
+                axios.delete('api/contact/'+id)
+                .then(function(){
+                    self.contact.name  = '';
+                    self.contact.email  = '';
+                    self.contact.phone  = '';
+                    self.contact.note  = '';
+                    self.edit = false;
+                })
+                .catch(err=>{
+                    console.log(err);
+                })
+                this.fetchContactList();
             }
+
         }
     }
 </script>
